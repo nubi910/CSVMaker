@@ -6,8 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- *
+ * This makes your class to csv header if it's a member of another class.
  *
  */
 @Retention(RetentionPolicy.RUNTIME)

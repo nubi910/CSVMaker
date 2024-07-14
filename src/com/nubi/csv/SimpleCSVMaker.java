@@ -18,6 +18,13 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+/**
+ * A Csv file maker.
+ * Able to use with {@link OutputStream} or {@link Path} with file.
+ *
+ *
+ * @param <T> The class that wants to make csv file.
+ */
 public class SimpleCSVMaker<T> {
 
     private Path file;
@@ -27,7 +34,7 @@ public class SimpleCSVMaker<T> {
     final private Collector<CharSequence, ?, String> csvShapeCollector = Collectors.joining(",", "", System.lineSeparator());
 
     /**
-     *
+     * A constructor that using {@link OutputStream}. The instance that made with this constructor is make CSV data out to given {@link OutputStream}
      *
      *
      * @param outputStream
@@ -49,6 +56,15 @@ public class SimpleCSVMaker<T> {
         this.clazz = clazz;
     }
 
+    /**
+     *  A constructor that using {@link Path}. The instance that made with this constructor is make CSV data file to given {@link Path}.
+     * If the file is already exists, this will move existing file to '.old' file.
+     *
+     *
+     * @param file
+     * @param objectCollection
+     * @param clazz
+     */
     public SimpleCSVMaker(Path file, Collection<T> objectCollection, Class<T> clazz) {
         if (file == null){
             throw new IllegalArgumentException("file can not be null");
