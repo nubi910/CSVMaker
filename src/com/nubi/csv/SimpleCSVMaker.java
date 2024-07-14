@@ -7,11 +7,13 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -24,25 +26,52 @@ public class SimpleCSVMaker<T> {
     final private Class<T> clazz;
     final private Collector<CharSequence, ?, String> csvShapeCollector = Collectors.joining(",", "", System.lineSeparator());
 
+    /**
+     *
+     *
+     *
+     * @param outputStream
+     * @param objectCollection Collection for make csv body lines.
+     * @param clazz Class for make header.
+     */
     public SimpleCSVMaker(OutputStream outputStream, Collection<T> objectCollection, Class<T> clazz) {
+        if (outputStream == null){
+            throw new IllegalArgumentException("outputStream can not be null");
+        }
+        if (objectCollection == null){
+            throw new IllegalArgumentException("objectCollection can not be null");
+        }
+        if (clazz == null){
+            throw new IllegalArgumentException("clazz can not be null");
+        }
         this.outputStream = outputStream;
         this.objectCollection = objectCollection;
         this.clazz = clazz;
     }
 
     public SimpleCSVMaker(Path file, Collection<T> objectCollection, Class<T> clazz) {
+        if (file == null){
+            throw new IllegalArgumentException("file can not be null");
+        }
+        if (objectCollection == null){
+            throw new IllegalArgumentException("objectCollection can not be null");
+        }
+        if (clazz == null){
+            throw new IllegalArgumentException("clazz can not be null");
+        }
         this.file = file;
         this.objectCollection = objectCollection;
         this.clazz = clazz;
     }
 
-    public boolean toCSV() throws Exception{
+    public boolean toCSV() throws IOException, IllegalAccessException {
         if (file != null){
             return csvFileOut() == file ;
         }
         if (outputStream != null){
             return csvStreamOut();
         }
+
         return false;
     }
 
@@ -61,7 +90,7 @@ public class SimpleCSVMaker<T> {
         return file;
     }
 
-    protected boolean csvStreamOut() throws Exception {
+    protected boolean csvStreamOut() throws IOException, IllegalAccessException{
         try (OutputStreamWriter writer = new OutputStreamWriter(outputStream)){
             writer.write(makeCSVHeader(clazz)
                     .stream()
@@ -77,6 +106,9 @@ public class SimpleCSVMaker<T> {
 
 
     protected List<String> makeCSVHeader(Class<?> c) {
+        if ( !isSpreadable(c) ){
+            return Collections.emptyList();
+        }
         List<String> r = new ArrayList<>();
         for(Field f : c.getDeclaredFields()){
             f.setAccessible(true);
@@ -94,12 +126,16 @@ public class SimpleCSVMaker<T> {
     }
 
     private List<String> makeCSVLine(Object obj, Class<?> c) throws IllegalAccessException {
+        if (!isSpreadable(c)){
+            return Collections.emptyList();
+        }
         List<String> r = new ArrayList<>();
         for (Field f : c.getDeclaredFields()){
             if (obj == null){
                 r.add("null");
                 continue;
             }
+            System.out.println(f.getType());
             f.setAccessible(true);
             if (f.isAnnotationPresent(CSVIgnore.class)){
                 continue;
@@ -112,6 +148,21 @@ public class SimpleCSVMaker<T> {
             }
         }
         return r;
+    }
+
+
+    private boolean isSpreadable(Class<?> c){
+        if (c.isPrimitive()){
+            return false;
+        }
+        if (c.equals(String.class)){
+            return false;
+        }
+        if (c.getDeclaredFields().length == 0){
+            return false;
+        }
+
+        return true;
     }
 
 

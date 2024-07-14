@@ -14,7 +14,7 @@ public class Main {
         // to see how IntelliJ IDEA suggests fixing it.
         List<TestObject2> c = new ArrayList<>();
         for (int i = 0 ; i < 5; i++){
-            c.add(new TestObject2(i, String.valueOf(i), i%2==0, new TestObject1(i, String.valueOf(i), i*2.222, (long)i, String.valueOf(i).charAt(0), i%3 ==0  ) ));
+            c.add(new TestObject2(i, String.valueOf(i), i%2==0, new TestObject1(i, String.valueOf(i), i*2.222, i, String.valueOf(i).charAt(0), i%3 ==0  ) ));
         }
 
         SimpleCSVMaker<TestObject2> testObject2SimpleCSVMaker = new SimpleCSVMaker<>(Path.of(System.getProperty("user.dir"),"result","result.csv"), c,TestObject2.class);
