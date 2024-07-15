@@ -32,6 +32,8 @@ public class SimpleCSVMaker<T> {
     final private Collection<T> objectCollection;
     final private Class<T> clazz;
     final private Collector<CharSequence, ?, String> csvShapeCollector = Collectors.joining(",", "", System.lineSeparator());
+    private boolean replaceOld = true;
+
 
     /**
      * A constructor that using {@link OutputStream}. The instance that made with this constructor is make CSV data out to given {@link OutputStream}
@@ -94,7 +96,7 @@ public class SimpleCSVMaker<T> {
     protected Path csvFileOut() throws IOException, IllegalAccessException {
         String h = makeCSVHeader(clazz).stream().collect(csvShapeCollector);
         Files.createDirectories(file.getParent());
-        if (Files.exists(file)){
+        if ( replaceOld && Files.exists(file)){
            Files.move(file, Path.of(String.valueOf(file.toAbsolutePath()).concat( "_"+DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now())+ ".old")));
         }
         Files.writeString(file, h, StandardOpenOption.CREATE);
@@ -179,6 +181,14 @@ public class SimpleCSVMaker<T> {
         }
 
         return true;
+    }
+
+    public void setReplaceOldFile(boolean replaceOld){
+        this.replaceOld = replaceOld;
+    }
+
+    public boolean getReplaceOldFile(){
+        return this.replaceOld;
     }
 
 
